@@ -69,4 +69,22 @@ public class SpringCourseDao implements CourseDao {
         String sql = "SELECT * FROM student";
         return jdbcTemplate.query(sql, new CourseMapper());
     }
+
+    @Override
+    public void addStudents(int studentId, int courseId) {
+        String sql = "INSERT INTO course_student (student_id, course_id) VALUES (?, ?)";
+        int insert = jdbcTemplate.update(sql, studentId, courseId);
+        if(insert == 1){
+            logger.info("Assigned to course successfully");
+        }
+    }
+
+    @Override
+    public void addLectures(int lectureId, int courseId) {
+        String sql = "INSERT INTO course_lecture (lectureId, course_id) VALUES (?, ?)";
+        int insert = jdbcTemplate.update(sql, lectureId, courseId);
+        if(insert == 1){
+            logger.info("Assigned to course successfully");
+        }
+    }
 }

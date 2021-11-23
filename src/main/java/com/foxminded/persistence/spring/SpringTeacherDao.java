@@ -69,4 +69,13 @@ public class SpringTeacherDao implements TeacherDao {
         String sql = "SELECT * FROM teacher";
         return jdbcTemplate.query(sql, new TeacherMapper());
     }
+
+    @Override
+    public void addLecture(int teacherId, int lectureId) {
+        String sql = "INSERT INTO teacher_lecture (teacher_id, lecture_id) VALUES (?, ?)";
+        int insert = jdbcTemplate.update(sql, teacherId, lectureId);
+        if(insert == 1){
+            logger.info("Successfully added");
+        }
+    }
 }
