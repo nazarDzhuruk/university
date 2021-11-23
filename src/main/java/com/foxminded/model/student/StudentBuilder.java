@@ -6,6 +6,5 @@ public interface StudentBuilder {
     StudentBuilder setName(String name);
     StudentBuilder setSurname(String surname);
     StudentBuilder setId(int id);
-    StudentBuilder setCourse(Course course);
     Student build();
 }

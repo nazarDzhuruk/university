@@ -10,28 +10,20 @@ import javax.persistence.OneToOne;
 public class Student {
     @Id
     private int ID;
-
     private String name;
     private String surname;
-
-    @OneToOne
-    private Course course;
 
     public Student(){
         super();
     }
 
-    public Student(int id, String name, String surname, Course course) {
+    public Student(int id, String name, String surname) {
         this();
         this.name = name;
         this.surname = surname;
         this.ID = id;
-        this.course = course;
     }
 
-    public Course getCourse() {
-        return course;
-    }
 
     public String getName() {
         return name;

@@ -6,7 +6,6 @@ public class StudentBuilderImpl implements StudentBuilder{
     private String name;
     private String surname;
     private int id;
-    private Course course;
 
     public StudentBuilderImpl(){
         super();
@@ -28,16 +27,9 @@ public class StudentBuilderImpl implements StudentBuilder{
         this.id = id;
         return this;
     }
-
-    @Override
-    public StudentBuilder setCourse(Course course) {
-        this.course = course;
-        return this;
-    }
-
     @Override
     public Student build() {
-        Student student = new Student(id, name, surname, course);
+        Student student = new Student(id, name, surname);
         return student;
     }
 }
