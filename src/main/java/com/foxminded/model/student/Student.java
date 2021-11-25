@@ -1,10 +1,12 @@
 package com.foxminded.model.student;
 
-import com.foxminded.model.course.Course;
+import com.foxminded.model.lecture.Lecture;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Student {
@@ -12,18 +14,21 @@ public class Student {
     private int ID;
     private String name;
     private String surname;
+    @OneToMany
+    private List<Lecture> lectures = new ArrayList<>();
+
 
     public Student(){
         super();
     }
 
-    public Student(int id, String name, String surname) {
+    public Student(int id, String name, String surname, List<Lecture> lectures) {
         this();
         this.name = name;
         this.surname = surname;
         this.ID = id;
+        this.lectures = lectures;
     }
-
 
     public String getName() {
         return name;
@@ -37,6 +42,9 @@ public class Student {
         return ID;
     }
 
+    public List<Lecture> getLectures() {
+        return lectures;
+    }
 
     @Override
     public String toString() {
@@ -44,6 +52,7 @@ public class Student {
                 "ID=" + ID +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
+                ", lectures=" + lectures +
                 '}';
     }
 }

@@ -4,7 +4,9 @@ import com.foxminded.model.lecture.Lecture;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Teacher {
@@ -13,21 +15,22 @@ public class Teacher {
     private String name;
     private String surname;
 
-    @OneToOne
-    private Lecture lecture;
+    @OneToMany
+    private List<Lecture> lecture = new ArrayList<>();
 
     public Teacher(){
         super();
     }
 
-    public Teacher(int id, String name, String surname, Lecture lecture) {
+    public Teacher(int id, String name, String surname, List<Lecture> lecture) {
         this();
         this.name = name;
         this.surname = surname;
         this.ID = id;
+        this.lecture = lecture;
     }
 
-    public Lecture getLecture() {
+    public List<Lecture> getLecture() {
         return lecture;
     }
 

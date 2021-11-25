@@ -2,10 +2,13 @@ package com.foxminded.model.teacher;
 
 import com.foxminded.model.lecture.Lecture;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TeacherBuilderImpl implements TeacherBuilder {
     private String name;
     private String surname;
-    private Lecture lecture;
+    private List<Lecture> lecture = new ArrayList<>();
     private int id;
 
     public TeacherBuilderImpl(){
@@ -25,7 +28,7 @@ public class TeacherBuilderImpl implements TeacherBuilder {
     }
 
     @Override
-    public TeacherBuilder setLecture(Lecture lecture) {
+    public TeacherBuilder setLecture(List<Lecture> lecture) {
         this.lecture = lecture;
         return this;
     }
