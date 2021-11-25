@@ -12,5 +12,5 @@ public interface TeacherService {
 
     void addLecture(int teacherId, int lectureId);
 
-    Set<Teacher> teacherIndex();
+    Teacher findTeacher(int id);
 }

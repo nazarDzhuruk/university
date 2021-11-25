@@ -6,4 +6,7 @@ public interface StudentService {
     void addStudent(Student student);
 
     void removeStudent(int id);
+
+    Student findStudent(int id);
+
 }

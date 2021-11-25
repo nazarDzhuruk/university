@@ -10,4 +10,6 @@ public interface CourseService {
     void addCourse(Course course);
 
     void removeCourse(int courseId);
+
+    Course findCourse(int courseId);
 }
