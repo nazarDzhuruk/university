@@ -10,10 +10,10 @@ import javax.sql.DataSource;
 @Configuration
 public class SpringConfig {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/test";
+    private static final String URL = "jdbc:postgresql://localhost:5432/test1";
     private static final String DRIVER = "org.postgresql.Driver";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "Fundacja214";
+    private static final String PASSWORD = "";
 
     @Bean
     public DataSource dataSource() {

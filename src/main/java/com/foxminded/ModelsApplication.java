@@ -53,7 +53,7 @@ public class ModelsApplication {
         Course course = new CourseBuilderImpl().setCourseID(222).setCourseName("test").build();
 
 
-        courseService.addStudentToCourse(3221, 222);
+        System.out.println();
 
 
 
