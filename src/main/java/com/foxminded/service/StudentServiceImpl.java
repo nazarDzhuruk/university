@@ -4,6 +4,8 @@ import com.foxminded.dao.CourseLectureDao;
 import com.foxminded.dao.CourseStudentDao;
 import com.foxminded.dao.LectureDao;
 import com.foxminded.dao.StudentDao;
+import com.foxminded.exception.UniversityDaoException;
+import com.foxminded.exception.UniversityServiceException;
 import com.foxminded.model.course.lectures.CourseLecture;
 import com.foxminded.model.course.students.CourseStudents;
 import com.foxminded.model.lecture.Lecture;
@@ -34,53 +36,55 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void addStudent(Student student) {
-        logger.debug("Start adding teacher: " + student.getID());
-        if (student == null) {
-            String error = "Cannot create, please enter student info";
-            logger.warn(error);
-        }
+        logger.debug("Service start add teacher");
         try {
             studentDao.create(student);
-            logger.info("Student has been added");
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (UniversityDaoException e) {
+            String msg = "Student has not been created";
+            logger.warn(msg);
+            throw new UniversityServiceException(msg, e);
         }
+        logger.info("Student has been created");
     }
 
     @Override
     public void removeStudent(int id) {
-        logger.debug("Start removing student: ");
+        logger.debug("Service start delete student...");
         try {
             studentDao.delete(id);
-            logger.info("Student has been deleted");
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (UniversityDaoException e) {
+            String msg = "Student has not been removed";
+            logger.warn(msg);
+            throw new UniversityServiceException(msg, e);
         }
     }
 
     @Override
     public Student findStudent(int id) {
-        logger.debug("Finding student...");
+        logger.debug("Service start find student...");
         Student student = studentDao.read(id).orElse(null);
 
         CourseStudents courseStudents = courseStudentDao.index().stream()
-                .filter(s -> s.getStudentId() == id).findAny().orElse(null);
+                .filter(s -> s.getStudentId() == id).findAny()
+                .orElseThrow(() -> {
+                    String exception = "Student not found";
+                    logger.warn(exception);
+                    return new UniversityServiceException(exception);
+                });
 
         List<CourseLecture> courseLecture = courseLectureDao.index().stream()
                 .filter(l -> l.getCourseId() == courseStudents.getCourseId())
                 .collect(Collectors.toList());
 
-        List<Lecture> lecture = lectureDao.index();
-
         List<Lecture> filtered = new ArrayList<>();
-
-        for (Lecture lectureFiltered : lecture) {
+        for (Lecture lectureFiltered : lectureDao.index()) {
             for (CourseLecture lectures : courseLecture) {
                 if (lectureFiltered.getID() == lectures.getLectureId()) {
                     filtered.add(lectureFiltered);
                 }
             }
         }
+        logger.info("Student has been found");
         student.getLectures().addAll(filtered);
         return student;
     }

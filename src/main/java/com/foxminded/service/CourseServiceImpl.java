@@ -1,6 +1,7 @@
 package com.foxminded.service;
 
 import com.foxminded.dao.*;
+import com.foxminded.exception.UniversityServiceException;
 import com.foxminded.model.course.Course;
 import com.foxminded.model.course.lectures.CourseLecture;
 import com.foxminded.model.course.students.CourseStudents;
@@ -36,34 +37,29 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void addLectureToCourse(int lectureId, int courseId) {
         logger.debug("Adding lecture to course");
-        try {
-            Lecture lecture = lectureDao.index().stream()
-                    .filter(l -> l.getID() == lectureId).findAny().orElse(null);
-            Course course = courseDao.index().stream()
-                    .filter(c -> c.getCourseID() == courseId).findAny().orElse(null);
-            if (lecture != null && course != null) {
-                courseLectureDao.addLectures(lecture.getID(), course.getCourseID());
-                logger.info("Lecture has been added");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Lecture lecture = lectureDao.index().stream()
+                .filter(l -> l.getID() == lectureId).findAny()
+                .orElseThrow(() -> new UniversityServiceException("Lecture not fund"));
+        Course course = courseDao.index().stream()
+                .filter(c -> c.getCourseID() == courseId).findAny()
+                .orElseThrow(() -> new UniversityServiceException("Course not found"));
+        courseLectureDao.addLectures(lecture.getID(), course.getCourseID());
+        logger.info("Lecture has been added");
+
     }
 
     @Override
     public void addStudentToCourse(int studentId, int courseId) {
         logger.debug("Adding student to course");
-        try {
-            Student student = studentDao.index().stream()
-                    .filter(s -> s.getID() == studentId).findAny().orElse(null);
-            Course course = courseDao.index().stream()
-                    .filter(c -> c.getCourseID() == courseId).findAny().orElse(null);
-            if (student != null && course != null) {
-                courseStudentDao.addStudents(student.getID(), course.getCourseID());
-                logger.info("Student has been added");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        Student student = studentDao.index().stream()
+                .filter(s -> s.getID() == studentId).findAny()
+                .orElseThrow(() -> new UniversityServiceException("Student not found"));
+        Course course = courseDao.index().stream()
+                .filter(c -> c.getCourseID() == courseId).findAny()
+                .orElseThrow(() -> new UniversityServiceException("Course not found"));
+        if (student != null && course != null) {
+            courseStudentDao.addStudents(student.getID(), course.getCourseID());
+            logger.info("Student has been added");
         }
     }
 
@@ -87,7 +83,6 @@ public class CourseServiceImpl implements CourseService {
         logger.debug("Start removing teacher: ");
         try {
             courseDao.delete(courseId);
-            logger.info("Course has been deleted");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -96,11 +91,13 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course findCourse(int courseId) {
         Course course = courseDao.index().stream()
-                .filter(c -> c.getCourseID() == courseId).findAny().orElse(null);
-
+                .filter(c -> c.getCourseID() == courseId).findAny().orElseThrow(() -> {
+                    String msg = "Course not found";
+                    logger.warn(msg);
+                    throw new UniversityServiceException(msg);
+                });
         List<Lecture> lectures = assignedLectures(courseId);
         List<Student> students = assignedStudents(courseId);
-
         course.getLecture().addAll(lectures);
         course.getStudents().addAll(students);
         return course;
@@ -109,10 +106,13 @@ public class CourseServiceImpl implements CourseService {
     private List<Lecture> assignedLectures(int courseId) {
         List<CourseLecture> courseLectures = courseLectureDao.index().stream()
                 .filter(l -> l.getCourseId() == courseId).collect(Collectors.toList());
-        List<Lecture> lectures = lectureDao.index();
-
+        if (courseLectures.size() == 0) {
+            String exception = "This course has not assigned lectures";
+            logger.warn(exception);
+            throw new UniversityServiceException(exception);
+        }
         List<Lecture> assigned = new ArrayList<>();
-        for (Lecture lecture : lectures) {
+        for (Lecture lecture : lectureDao.index()) {
             for (CourseLecture courseLecture : courseLectures) {
                 if (lecture.getID() == courseLecture.getLectureId()) {
                     assigned.add(lecture);
@@ -125,10 +125,13 @@ public class CourseServiceImpl implements CourseService {
     private List<Student> assignedStudents(int courseId) {
         List<CourseStudents> courseStudents = courseStudentDao.index().stream()
                 .filter(c -> c.getCourseId() == courseId).collect(Collectors.toList());
-        List<Student> students = studentDao.index();
-
+        if (courseStudents.size() == 0) {
+            String exception = "This course has not assigned students";
+            logger.warn(exception);
+            throw new UniversityServiceException(exception);
+        }
         List<Student> assigned = new ArrayList<>();
-        for (Student student : students) {
+        for (Student student : studentDao.index()) {
             for (CourseStudents courseStudent : courseStudents) {
                 if (student.getID() == courseStudent.getStudentId()) {
                     assigned.add(student);
