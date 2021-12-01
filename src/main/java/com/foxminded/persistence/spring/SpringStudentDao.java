@@ -1,12 +1,16 @@
 package com.foxminded.persistence.spring;
 
 import com.foxminded.dao.StudentDao;
+import com.foxminded.exception.UniversityDaoException;
 import com.foxminded.model.student.Student;
 import com.foxminded.model.student.StudentMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -21,46 +25,73 @@ public class SpringStudentDao implements StudentDao {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public void setDataSource(JdbcTemplate jdbcTemplate){
-       this.jdbcTemplate = jdbcTemplate;
+
+    public void setDataSource(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void create(Student student) {
-        String sql = "INSERT INTO student VALUES(?,?,?)";
-        int insert = jdbcTemplate.update(sql, student.getID(), student.getName(), student.getSurname());
-        if (insert == 1) {
-            logger.info("New student added " + student.toString());
+        logger.debug("Add student status: in progress... ");
+        if (student == null) {
+            String exception = "Add student status: student is null!";
+            logger.warn(exception);
+            throw new UniversityDaoException(exception);
         }
+        String sql = "INSERT INTO student VALUES(?,?,?)";
+        try {
+            jdbcTemplate.update(sql, student.getID(), student.getName(), student.getSurname());
+        } catch (DuplicateKeyException e) {
+            String duplicate = "Student already exist";
+            logger.warn(duplicate);
+            throw new UniversityDaoException(duplicate);
+        }
+        logger.info("Add student status: added successfully. ");
     }
 
     @Override
     public Optional<Student> read(int id) {
+        logger.debug("Read from database status: in progress... ");
         String sql = "SELECT * FROM student WHERE id=?";
-        Student student = null;
+        Student student;
         try {
-            student = jdbcTemplate.queryForObject(sql, new Object[]{id}, new StudentMapper());
+            student = jdbcTemplate.queryForObject(sql, new StudentMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            String error = "Student not found";
+            logger.warn(error);
+            throw new UniversityDaoException(error, e);
         } catch (DataAccessException exception) {
-            logger.info("Student not found " + id);
+            String throwE = "Unable to get";
+            logger.warn(throwE + id);
+            throw new UniversityDaoException(throwE, exception);
         }
+        logger.info("Success read file");
         return Optional.ofNullable(student);
     }
 
     @Override
     public void delete(int id) {
+        logger.debug("Deleting...");
         String sql = "DELETE FROM student WHERE id=?";
-        int delete = jdbcTemplate.update(sql, id);
-        if (delete == 1) {
-            logger.info("Student has been deleted");
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (BadSqlGrammarException e) {
+            String msg = "Student does not exist";
+            logger.warn(msg);
+            throw new UniversityDaoException(msg, e);
         }
     }
 
     @Override
     public void update(Student student) {
+        logger.debug("Updating student...");
         String sql = "UPDATE student SET name=?, surname=? WHERE id=?";
-        int update = jdbcTemplate.update(sql, student.getName(), student.getSurname(), student.getID());
-        if (update == 1) {
-            logger.info("Student info has been updated");
+        try {
+            jdbcTemplate.update(sql, student.getName(), student.getSurname(), student.getID());
+        } catch (BadSqlGrammarException e) {
+            String msg = "Student has not been updated";
+            logger.warn(msg);
+            throw new UniversityDaoException(msg);
         }
     }
 

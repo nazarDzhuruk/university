@@ -1,11 +1,13 @@
 package com.foxminded.persistence.spring;
 
 import com.foxminded.dao.TeachersLectureDao;
+import com.foxminded.exception.UniversityDaoException;
 import com.foxminded.model.teacher.lectures.TeacherLecture;
 import com.foxminded.model.teacher.lectures.TeacherLectureMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +28,12 @@ public class SpringTeacherLectureDao implements TeachersLectureDao {
     @Override
     public void assignLecture(int teacherId, int lectureId) {
         String sql = "INSERT INTO teacher_lecture (teacher_id, lecture_id) VALUES (?, ?)";
-        int insert = jdbcTemplate.update(sql, teacherId, lectureId);
-        if(insert == 1){
-            logger.info("Successfully added");
+        try {
+            jdbcTemplate.update(sql, teacherId, lectureId);
+        }catch (BadSqlGrammarException e){
+            String msg = "Teacher or lecture not found";
+            logger.warn(msg);
+            throw new UniversityDaoException(msg, e);
         }
     }
 
